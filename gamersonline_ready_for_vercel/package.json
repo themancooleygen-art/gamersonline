@@ -1,0 +1,6 @@
+
+{
+  "name": "gamersonline-root",
+  "private": true,
+  "workspaces": ["apps/*"]
+}
