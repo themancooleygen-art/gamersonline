@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { createSessionToken } from "@/lib/session";
 
 function extractSteamId(claimedId) {
   const match = claimedId.match(/\/(\d+)$/);
   return match ? match[1] : null;
 }
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export async function GET(request) {
   const url = new URL(request.url);
@@ -54,8 +60,24 @@ export async function GET(request) {
       personaName = player.personaname || personaName;
       avatar = player.avatarfull || "";
     }
-  } catch {
-    // Continue even if profile fetch fails
+  } catch {}
+
+  const { error } = await supabase.from("players").upsert(
+    {
+      steam_id: steamId,
+      username: personaName,
+      avatar,
+      elo: 1000,
+      created_at: new Date().toISOString(),
+    },
+    {
+      onConflict: "steam_id",
+    }
+  );
+
+  if (error) {
+    console.error("Supabase upsert error:", error);
+    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?steam=db_error`);
   }
 
   const token = await createSessionToken({

@@ -1,17 +1,22 @@
-GamersOnline Steam Login Patch
+GamersOnline Supabase Player Insert Patch
 
-Add these files into your existing GitHub repo.
+Steps:
 
-Important:
-1. Upload/replace these files in your repo.
-2. Make sure these Vercel env vars already exist:
-   - STEAM_API_KEY
-   - NEXTAUTH_URL
-   - NEXTAUTH_SECRET
-3. Commit changes to GitHub.
-4. Vercel will auto-redeploy.
+1) Replace this file in your repo:
+apps/web/app/api/auth/steam/callback/route.js
 
-After deploy:
-- Visit https://www.gamersonline.gg
-- Click "Sign in with Steam"
-- You should land on /me
+2) Add dependency to:
+apps/web/package.json
+
+Add:
+"@supabase/supabase-js": "^2.49.1"
+
+3) Add Vercel environment variable:
+
+SUPABASE_SERVICE_ROLE_KEY
+
+(Value = Secret key from Supabase dashboard → API Keys)
+
+Push to GitHub → Vercel auto redeploys
+
+Login again with Steam → check Supabase players table
