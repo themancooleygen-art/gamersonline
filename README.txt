@@ -1,22 +1,16 @@
-GamersOnline Supabase Player Insert Patch
+GamersOnline Ranked Queue Patch
 
-Steps:
+What this adds:
+- Queue join API route
+- Ranked Queue page with Join Queue button
+- SQL file to create the queue_entries table in Supabase
 
-1) Replace this file in your repo:
-apps/web/app/api/auth/steam/callback/route.js
+Before using:
+1. Run the SQL in supabase_queue_entries.sql inside Supabase SQL Editor
+2. Upload/replace these files in your GitHub repo
+3. Commit changes and let Vercel redeploy
 
-2) Add dependency to:
-apps/web/package.json
-
-Add:
-"@supabase/supabase-js": "^2.49.1"
-
-3) Add Vercel environment variable:
-
-SUPABASE_SERVICE_ROLE_KEY
-
-(Value = Secret key from Supabase dashboard → API Keys)
-
-Push to GitHub → Vercel auto redeploys
-
-Login again with Steam → check Supabase players table
+This patch expects these env vars to already exist in Vercel:
+- NEXT_PUBLIC_SUPABASE_URL
+- SUPABASE_SERVICE_ROLE_KEY
+- NEXTAUTH_SECRET

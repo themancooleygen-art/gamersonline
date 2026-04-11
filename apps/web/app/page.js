@@ -30,6 +30,9 @@ export default function HomePage() {
           <a href="/me" style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.05)", color: "white", padding: "14px 22px", borderRadius: 16, fontWeight: 800, textDecoration: "none", textTransform: "uppercase", letterSpacing: 1 }}>
             My Profile
           </a>
+          <a href="/queue" style={{ border: "1px solid rgba(255,255,255,0.15)", background: "rgba(230,57,70,0.12)", color: "white", padding: "14px 22px", borderRadius: 16, fontWeight: 800, textDecoration: "none", textTransform: "uppercase", letterSpacing: 1 }}>
+            Join Queue
+          </a>
         </div>
       </div>
     </main>
