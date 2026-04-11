@@ -1,0 +1,11 @@
+{
+  "name": "@gamersonline/database",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev --name init"
+  },
+  "dependencies": {"@prisma/client": "^5.13.0"},
+  "devDependencies": {"prisma": "^5.13.0"}
+}

@@ -1,0 +1,111 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+enum UserStatus { ACTIVE SUSPENDED BANNED PENDING_VERIFICATION }
+enum SubscriptionPlan { FREE PRO ORGANIZER }
+enum SubscriptionStatus { ACTIVE CANCELED PAST_DUE TRIALING }
+enum QueueType { SOLO DUO FIVE_STACK SCRIM }
+enum QueueTicketStatus { OPEN MATCHED CANCELED EXPIRED }
+enum MatchStatus { PENDING LIVE COMPLETED CANCELED DISPUTED }
+enum AntiCheatSeverity { LOW MEDIUM HIGH CRITICAL }
+enum AdminCaseStatus { OPEN IN_REVIEW ACTIONED APPEALED CLOSED }
+
+model User {
+  id                String @id @default(cuid())
+  email             String @unique
+  passwordHash      String
+  gamerTag          String @unique
+  steamId           String? @unique
+  region            String
+  status            UserStatus @default(PENDING_VERIFICATION)
+  trustScore        Int @default(50)
+  deviceFingerprint String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  profile           PlayerProfile?
+  subscriptions     Subscription[]
+  queueTickets      QueueTicket[]
+  antiCheatEvents   AntiCheatEvent[]
+  adminCases        AdminCase[]
+}
+model PlayerProfile {
+  id              String @id @default(cuid())
+  userId          String @unique
+  primaryRole     String?
+  bio             String?
+  avatarUrl       String?
+  elo             Int @default(1000)
+  wins            Int @default(0)
+  losses          Int @default(0)
+  headshotPercent Float? @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model Subscription {
+  id                 String @id @default(cuid())
+  userId             String
+  plan               SubscriptionPlan @default(FREE)
+  status             SubscriptionStatus @default(TRIALING)
+  billingProvider    String?
+  externalCustomerId String?
+  externalSubId      String?
+  renewalDate        DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  user               User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model QueueTicket {
+  id            String @id @default(cuid())
+  userId        String
+  queueType     QueueType
+  region        String
+  partySize     Int
+  mmrSnapshot   Int
+  trustSnapshot Int
+  status        QueueTicketStatus @default(OPEN)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  matchId       String?
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match         Match? @relation(fields: [matchId], references: [id])
+}
+model Match {
+  id           String @id @default(cuid())
+  status       MatchStatus @default(PENDING)
+  region       String
+  mapPool      String[]
+  selectedMap  String?
+  serverId     String?
+  startedAt    DateTime?
+  endedAt      DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  queueTickets QueueTicket[]
+}
+model AntiCheatEvent {
+  id               String @id @default(cuid())
+  userId           String
+  sessionId        String
+  signalType       String
+  severity         AntiCheatSeverity
+  source           String
+  rawPayload       Json
+  createdAt        DateTime @default(now())
+  user             User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  adminCases       AdminCase[]
+}
+model AdminCase {
+  id               String @id @default(cuid())
+  userId           String
+  antiCheatEventId String?
+  title            String
+  status           AdminCaseStatus @default(OPEN)
+  severity         AntiCheatSeverity
+  assignedAdmin    String?
+  resolution       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  antiCheatEvent   AntiCheatEvent? @relation(fields: [antiCheatEventId], references: [id])
+}

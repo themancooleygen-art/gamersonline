@@ -1,0 +1,7 @@
+{
+  "name": "@gamersonline/worker",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {"dev": "node src/index.js", "build": "echo worker-build-placeholder"},
+  "dependencies": {"ioredis": "^5.4.1"}
+}
