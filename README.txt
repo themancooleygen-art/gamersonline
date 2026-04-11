@@ -1,16 +1,15 @@
-GamersOnline Ranked Queue Patch
+GamersOnline Full Visual Design Patch
 
-What this adds:
-- Queue join API route
-- Ranked Queue page with Join Queue button
-- SQL file to create the queue_entries table in Supabase
+This patch updates the whole site to the aggressive red / blue / white esports style:
+- homepage
+- Steam profile page
+- ranked queue page
+- matches page
 
-Before using:
-1. Run the SQL in supabase_queue_entries.sql inside Supabase SQL Editor
-2. Upload/replace these files in your GitHub repo
-3. Commit changes and let Vercel redeploy
+Upload these files into your GitHub repo, replacing the current ones:
+- apps/web/app/page.js
+- apps/web/app/me/page.js
+- apps/web/app/queue/page.js
+- apps/web/app/matches/page.js
 
-This patch expects these env vars to already exist in Vercel:
-- NEXT_PUBLIC_SUPABASE_URL
-- SUPABASE_SERVICE_ROLE_KEY
-- NEXTAUTH_SECRET
+Then commit changes and let Vercel redeploy.
