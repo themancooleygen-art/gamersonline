@@ -60,8 +60,10 @@ export async function GET(request) {
       `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${process.env.STEAM_API_KEY}&steamids=${steamId}`,
       { cache: "no-store" }
     );
+
     const profileJson = await profileRes.json();
     const player = profileJson?.response?.players?.[0];
+
     if (player) {
       personaName = player.personaname || personaName;
       avatar = player.avatarfull || "";
@@ -80,13 +82,7 @@ export async function GET(request) {
       onConflict: "steam_id",
     }
   );
-response.cookies.set("gamersonline_session", token, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  path: "/",
-  maxAge: 60 * 60 * 24 * 30,
-});
+
   const token = await createSessionToken({
     steamId,
     personaName,
@@ -94,6 +90,7 @@ response.cookies.set("gamersonline_session", token, {
   });
 
   const response = NextResponse.redirect(`${origin}/me`);
+
   response.cookies.set("gamersonline_session", token, {
     httpOnly: true,
     secure: true,
