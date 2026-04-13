@@ -1,14 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function QueuePage() {
   const [region, setRegion] = useState("NA");
   const [queueType, setQueueType] = useState("ranked_5v5");
   const [loading, setLoading] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [countLoading, setCountLoading] = useState(true);
+  const [queueCount, setQueueCount] = useState(0);
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
+
+  async function loadQueueCount() {
+    try {
+      setCountLoading(true);
+      const res = await fetch(`/api/queue/count?region=${region}&queueType=${queueType}`, {
+        method: "GET",
+        cache: "no-store"
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to load queue count.");
+      }
+
+      setQueueCount(data.count || 0);
+    } catch {
+      setQueueCount(0);
+    } finally {
+      setCountLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadQueueCount();
+  }, [region, queueType]);
 
   async function joinQueue() {
     setLoading(true);
@@ -35,6 +63,7 @@ export default function QueuePage() {
       }
 
       setResult(data.message || "Joined queue.");
+      await loadQueueCount();
     } catch (err) {
       setError(err.message || "Queue join failed.");
     } finally {
@@ -67,6 +96,7 @@ export default function QueuePage() {
       }
 
       setResult(data.message || "Left queue.");
+      await loadQueueCount();
     } catch (err) {
       setError(err.message || "Queue leave failed.");
     } finally {
@@ -101,6 +131,26 @@ export default function QueuePage() {
         >
           Ranked Queue
         </h1>
+
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 22,
+            padding: "10px 16px",
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.08)"
+          }}
+        >
+          <span style={{ color: "#94a3b8", fontSize: 14, textTransform: "uppercase", letterSpacing: 1 }}>
+            Live queue count
+          </span>
+          <span style={{ fontWeight: 900, fontSize: 22, color: "#ffffff" }}>
+            {countLoading ? "..." : queueCount}
+          </span>
+        </div>
 
         <div
           style={{
