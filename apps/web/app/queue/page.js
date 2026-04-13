@@ -6,6 +6,7 @@ export default function QueuePage() {
   const [region, setRegion] = useState("NA");
   const [queueType, setQueueType] = useState("ranked_5v5");
   const [loading, setLoading] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
 
@@ -38,6 +39,38 @@ export default function QueuePage() {
       setError(err.message || "Queue join failed.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function leaveQueue() {
+    setLeaving(true);
+    setResult("");
+    setError("");
+
+    try {
+      const res = await fetch("/api/queue/leave", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ region, queueType })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error
+            ? `${data.message} ${data.error}`
+            : (data.message || "Queue leave failed.")
+        );
+      }
+
+      setResult(data.message || "Left queue.");
+    } catch (err) {
+      setError(err.message || "Queue leave failed.");
+    } finally {
+      setLeaving(false);
     }
   }
 
@@ -141,7 +174,7 @@ export default function QueuePage() {
 
             <button
               onClick={joinQueue}
-              disabled={loading}
+              disabled={loading || leaving}
               style={{
                 background: "#0B3C91",
                 color: "white",
@@ -157,6 +190,26 @@ export default function QueuePage() {
               }}
             >
               {loading ? "Joining..." : "Join Ranked Queue"}
+            </button>
+
+            <button
+              onClick={leaveQueue}
+              disabled={loading || leaving}
+              style={{
+                background: "#E63946",
+                color: "white",
+                padding: "15px 18px",
+                borderRadius: 15,
+                border: "none",
+                fontWeight: 900,
+                fontSize: 18,
+                textTransform: "uppercase",
+                letterSpacing: 1,
+                cursor: "pointer",
+                boxShadow: "0 18px 40px rgba(230,57,70,0.24)"
+              }}
+            >
+              {leaving ? "Leaving..." : "Leave Queue"}
             </button>
           </div>
 
