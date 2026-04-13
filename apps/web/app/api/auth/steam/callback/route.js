@@ -80,7 +80,13 @@ export async function GET(request) {
       onConflict: "steam_id",
     }
   );
-
+response.cookies.set("gamersonline_session", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+  maxAge: 60 * 60 * 24 * 30,
+});
   const token = await createSessionToken({
     steamId,
     personaName,
