@@ -8,11 +8,13 @@ function extractSteamId(claimedId) {
 }
 
 export async function GET(request) {
+  const origin = new URL(request.url).origin;
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?steam=config_error`);
+    return NextResponse.redirect(`${origin}/?steam=config_error`);
   }
 
   const supabase = createClient(supabaseUrl, serviceRoleKey);
@@ -22,35 +24,32 @@ export async function GET(request) {
 
   const claimedId = searchParams.get("openid.claimed_id");
   if (!claimedId) {
-    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?steam=missing_claim`);
+    return NextResponse.redirect(`${origin}/?steam=missing_claim`);
   }
 
   const verificationParams = new URLSearchParams();
   for (const [key, value] of searchParams.entries()) {
     verificationParams.append(key, value);
   }
-
   verificationParams.set("openid.mode", "check_authentication");
 
   const verifyRes = await fetch("https://steamcommunity.com/openid/login", {
     method: "POST",
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
+      "Content-Type": "application/x-www-form-urlencoded",
     },
     body: verificationParams.toString(),
-    cache: "no-store"
+    cache: "no-store",
   });
 
   const verifyText = await verifyRes.text();
-
   if (!verifyText.includes("is_valid:true")) {
-    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?steam=invalid`);
+    return NextResponse.redirect(`${origin}/?steam=invalid`);
   }
 
   const steamId = extractSteamId(claimedId);
-
   if (!steamId) {
-    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?steam=bad_id`);
+    return NextResponse.redirect(`${origin}/?steam=bad_id`);
   }
 
   let personaName = "Steam Player";
@@ -58,12 +57,11 @@ export async function GET(request) {
 
   try {
     const profileRes = await fetch(
-      `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${process.env.STEAM_API_KEY}&steamids=${steamId}`
+      `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${process.env.STEAM_API_KEY}&steamids=${steamId}`,
+      { cache: "no-store" }
     );
-
     const profileJson = await profileRes.json();
     const player = profileJson?.response?.players?.[0];
-
     if (player) {
       personaName = player.personaname || personaName;
       avatar = player.avatarfull || "";
@@ -76,27 +74,26 @@ export async function GET(request) {
       username: personaName,
       avatar,
       elo: 1000,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     },
     {
-      onConflict: "steam_id"
+      onConflict: "steam_id",
     }
   );
 
   const token = await createSessionToken({
     steamId,
     personaName,
-    avatar
+    avatar,
   });
 
-  const response = NextResponse.redirect(`${process.env.NEXTAUTH_URL}/me`);
-
+  const response = NextResponse.redirect(`${origin}/me`);
   response.cookies.set("gamersonline_session", token, {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30
+    maxAge: 60 * 60 * 24 * 30,
   });
 
   return response;
