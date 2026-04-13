@@ -26,12 +26,12 @@ export default function QueuePage() {
       const data = await res.json();
 
       if (!res.ok) {
-  throw new Error(
-    data.error
-      ? `${data.message} ${data.error}`
-      : (data.message || "Queue join failed.")
-  );
-}
+        throw new Error(
+          data.error
+            ? `${data.message} ${data.error}`
+            : (data.message || "Queue join failed.")
+        );
+      }
 
       setResult(data.message || "Joined queue.");
     } catch (err) {
@@ -56,7 +56,16 @@ export default function QueuePage() {
         <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "#93c5fd" }}>
           GamersOnline.gg
         </div>
-        <h1 style={{ fontSize: 62, fontWeight: 900, margin: "14px 0 24px", textTransform: "uppercase", letterSpacing: -1 }}>
+
+        <h1
+          style={{
+            fontSize: 62,
+            fontWeight: 900,
+            margin: "14px 0 24px",
+            textTransform: "uppercase",
+            letterSpacing: -1
+          }}
+        >
           Ranked Queue
         </h1>
 
@@ -71,7 +80,17 @@ export default function QueuePage() {
         >
           <div style={{ display: "grid", gap: 18, maxWidth: 520 }}>
             <div>
-              <label style={{ display: "block", marginBottom: 8, color: "#e2e8f0", fontSize: 16 }}>Queue Type</label>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: 8,
+                  color: "#e2e8f0",
+                  fontSize: 16
+                }}
+              >
+                Queue Type
+              </label>
+
               <select
                 value={queueType}
                 onChange={(e) => setQueueType(e.target.value)}
@@ -90,7 +109,17 @@ export default function QueuePage() {
             </div>
 
             <div>
-              <label style={{ display: "block", marginBottom: 8, color: "#e2e8f0", fontSize: 16 }}>Region</label>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: 8,
+                  color: "#e2e8f0",
+                  fontSize: 16
+                }}
+              >
+                Region
+              </label>
+
               <select
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
@@ -156,7 +185,8 @@ export default function QueuePage() {
                 background: "rgba(239,68,68,0.12)",
                 border: "1px solid rgba(239,68,68,0.2)",
                 color: "#fecaca",
-                fontWeight: 700
+                fontWeight: 700,
+                whiteSpace: "pre-wrap"
               }}
             >
               {error}
