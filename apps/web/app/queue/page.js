@@ -26,8 +26,12 @@ export default function QueuePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Queue join failed.");
-      }
+  throw new Error(
+    data.error
+      ? `${data.message} ${data.error}`
+      : (data.message || "Queue join failed.")
+  );
+}
 
       setResult(data.message || "Joined queue.");
     } catch (err) {
