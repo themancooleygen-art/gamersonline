@@ -59,6 +59,37 @@ export async function POST(request) {
     const queueType = body.queueType || "ranked_5v5";
     const region = body.region || "NA";
 
+    const { data: existingEntry, error: existingError } = await supabase
+      .from("queue_entries")
+      .select("id, steam_id, queue_type, region, status")
+      .eq("steam_id", session.steamId)
+      .eq("queue_type", queueType)
+      .eq("region", region)
+      .eq("status", "queued")
+      .maybeSingle();
+
+    if (existingError) {
+      return NextResponse.json(
+        {
+          message: "Failed to check existing queue entry.",
+          error: existingError.message,
+          details: existingError.details ?? null,
+          hint: existingError.hint ?? null,
+          code: existingError.code ?? null,
+        },
+        { status: 500 }
+      );
+    }
+
+    if (existingEntry) {
+      return NextResponse.json({
+        ok: true,
+        alreadyQueued: true,
+        entry: existingEntry,
+        message: "You are already in queue.",
+      });
+    }
+
     const { data, error } = await supabase
       .from("queue_entries")
       .insert({
