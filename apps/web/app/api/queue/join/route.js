@@ -59,14 +59,14 @@ export async function POST(request) {
     const queueType = body.queueType || "ranked_5v5";
     const region = body.region || "NA";
 
-    const { data: existingEntry, error: existingError } = await supabase
+    const { data: existingEntries, error: existingError } = await supabase
       .from("queue_entries")
-      .select("id, steam_id, queue_type, region, status")
+      .select("id, steam_id, queue_type, region, status, created_at")
       .eq("steam_id", session.steamId)
       .eq("queue_type", queueType)
       .eq("region", region)
       .eq("status", "queued")
-      .maybeSingle();
+      .order("created_at", { ascending: true });
 
     if (existingError) {
       return NextResponse.json(
@@ -81,11 +81,12 @@ export async function POST(request) {
       );
     }
 
-    if (existingEntry) {
+    if (existingEntries && existingEntries.length > 0) {
       return NextResponse.json({
         ok: true,
         alreadyQueued: true,
-        entry: existingEntry,
+        entry: existingEntries[0],
+        duplicateCount: existingEntries.length,
         message: "You are already in queue.",
       });
     }
