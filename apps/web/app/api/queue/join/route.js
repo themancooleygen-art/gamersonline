@@ -3,12 +3,19 @@ import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { verifySessionToken } from "@/lib/session";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 export async function POST(request) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return NextResponse.json(
+      { message: "Missing Supabase environment variables." },
+      { status: 500 }
+    );
+  }
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey);
+
   const token = cookies().get("gamersonline_session")?.value;
 
   if (!token) {
@@ -58,8 +65,10 @@ export async function POST(request) {
     .single();
 
   if (error) {
-    console.error("Queue insert error:", error);
-    return NextResponse.json({ message: "Failed to join queue.", error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to join queue.", error: error.message },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({
