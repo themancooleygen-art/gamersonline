@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
-export async function GET() {
-  const response = NextResponse.redirect(process.env.NEXTAUTH_URL);
+export async function GET(request) {
+  const origin = new URL(request.url).origin;
+  const response = NextResponse.redirect(`${origin}/`);
+
   response.cookies.set("gamersonline_session", "", {
     httpOnly: true,
     secure: true,
@@ -9,5 +11,6 @@ export async function GET() {
     path: "/",
     maxAge: 0,
   });
+
   return response;
 }
