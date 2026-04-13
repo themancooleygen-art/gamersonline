@@ -1,16 +1,13 @@
-import { SignJWT, jwtVerify } from "jose";
+import jwt from "jsonwebtoken";
 
-const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+const SESSION_SECRET = process.env.NEXTAUTH_SECRET;
 
-export async function createSessionToken(payload) {
-  return new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("30d")
-    .sign(secret);
+export function createSessionToken(payload) {
+  return jwt.sign(payload, SESSION_SECRET, {
+    expiresIn: "7d",
+  });
 }
 
-export async function verifySessionToken(token) {
-  const { payload } = await jwtVerify(token, secret);
-  return payload;
+export function verifySessionToken(token) {
+  return jwt.verify(token, SESSION_SECRET);
 }
