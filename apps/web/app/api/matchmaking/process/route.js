@@ -30,7 +30,13 @@ export async function POST(request) {
 
     if (queueError) {
       return NextResponse.json(
-        { message: "Failed to read queue.", error: queueError.message },
+        {
+          message: "Failed to read queue.",
+          error: queueError.message,
+          details: queueError.details ?? null,
+          hint: queueError.hint ?? null,
+          code: queueError.code ?? null,
+        },
         { status: 500 }
       );
     }
@@ -67,7 +73,13 @@ export async function POST(request) {
 
     if (matchError) {
       return NextResponse.json(
-        { message: "Failed to create match.", error: matchError.message },
+        {
+          message: "Failed to create match.",
+          error: matchError.message,
+          details: matchError.details ?? null,
+          hint: matchError.hint ?? null,
+          code: matchError.code ?? null,
+        },
         { status: 500 }
       );
     }
@@ -86,6 +98,9 @@ export async function POST(request) {
           message: "Match created, but queue entry update failed.",
           match,
           error: updateError.message,
+          details: updateError.details ?? null,
+          hint: updateError.hint ?? null,
+          code: updateError.code ?? null,
         },
         { status: 500 }
       );
