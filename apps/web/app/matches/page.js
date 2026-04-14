@@ -347,6 +347,115 @@ export default function MatchesPage() {
 
               <div
                 style={{
+                  marginTop: 16,
+                  display: "grid",
+                  gap: 12,
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                }}
+              >
+                <div
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 16,
+                    padding: 14,
+                    background: "rgba(255,255,255,0.03)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#93c5fd",
+                    }}
+                  >
+                    Server IP
+                  </div>
+                  <div style={{ marginTop: 6, fontWeight: 900 }}>
+                    {match.connect_ip || "TBD"}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 16,
+                    padding: 14,
+                    background: "rgba(255,255,255,0.03)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#93c5fd",
+                    }}
+                  >
+                    Port
+                  </div>
+                  <div style={{ marginTop: 6, fontWeight: 900 }}>
+                    {match.connect_port || "TBD"}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 16,
+                    padding: 14,
+                    background: "rgba(255,255,255,0.03)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#93c5fd",
+                    }}
+                  >
+                    Password
+                  </div>
+                  <div style={{ marginTop: 6, fontWeight: 900 }}>
+                    {match.connect_password || "TBD"}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 12,
+                  border: "1px solid rgba(34,197,94,0.2)",
+                  borderRadius: 16,
+                  padding: 14,
+                  background: "rgba(34,197,94,0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 12,
+                    letterSpacing: 2,
+                    textTransform: "uppercase",
+                    color: "#86efac",
+                  }}
+                >
+                  CS2 Connect String
+                </div>
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontWeight: 900,
+                    wordBreak: "break-all",
+                    color: "#ffffff",
+                  }}
+                >
+                  {match.connect_string || "TBD"}
+                </div>
+              </div>
+
+              <div
+                style={{
                   marginTop: 20,
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
