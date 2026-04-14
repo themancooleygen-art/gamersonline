@@ -168,11 +168,15 @@ export default function LeaderboardPage() {
           </div>
 
           {loading ? (
-            <div style={{ padding: 24, color: "#cbd5e1" }}>Loading leaderboard...</div>
+            <div style={{ padding: 24, color: "#cbd5e1" }}>
+              Loading leaderboard...
+            </div>
           ) : null}
 
           {!loading && players.length === 0 ? (
-            <div style={{ padding: 24, color: "#cbd5e1" }}>No players found yet.</div>
+            <div style={{ padding: 24, color: "#cbd5e1" }}>
+              No players found yet.
+            </div>
           ) : null}
 
           {!loading &&
@@ -196,10 +200,13 @@ export default function LeaderboardPage() {
                     fontWeight: 900,
                     fontSize: 22,
                     color:
-                      idx === 0 ? "#facc15" :
-                      idx === 1 ? "#e2e8f0" :
-                      idx === 2 ? "#fca5a5" :
-                      "#ffffff",
+                      idx === 0
+                        ? "#facc15"
+                        : idx === 1
+                        ? "#e2e8f0"
+                        : idx === 2
+                        ? "#fca5a5"
+                        : "#ffffff",
                   }}
                 >
                   #{idx + 1}
@@ -231,9 +238,18 @@ export default function LeaderboardPage() {
                   )}
 
                   <div>
-                    <div style={{ fontWeight: 900, fontSize: 18 }}>
+                    <a
+                      href={`/player/${player.steam_id}`}
+                      style={{
+                        fontWeight: 900,
+                        fontSize: 18,
+                        color: "#ffffff",
+                        textDecoration: "none",
+                      }}
+                    >
                       {player.username || "Unknown Player"}
-                    </div>
+                    </a>
+
                     <div
                       style={{
                         color: "#94a3b8",
