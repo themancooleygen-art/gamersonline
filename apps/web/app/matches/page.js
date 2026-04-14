@@ -6,6 +6,8 @@ export default function MatchesPage() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+  const [busyMapKey, setBusyMapKey] = useState("");
 
   async function loadMatches() {
     try {
@@ -44,6 +46,43 @@ export default function MatchesPage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  async function banMap(matchId, mapName) {
+    const key = `${matchId}:${mapName}`;
+    setBusyMapKey(key);
+    setActionMessage("");
+    setError("");
+
+    try {
+      const res = await fetch("/api/matches/veto", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          matchId,
+          mapName,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error
+            ? `${data.message} ${data.error}`
+            : data.message || "Failed to ban map."
+        );
+      }
+
+      setActionMessage(data.message || "Map veto updated.");
+      await loadMatches();
+    } catch (err) {
+      setError(err.message || "Failed to ban map.");
+    } finally {
+      setBusyMapKey("");
+    }
+  }
 
   function renderPlayerCard(player, idx) {
     return (
@@ -135,6 +174,22 @@ export default function MatchesPage() {
             {loading ? "..." : matches.length}
           </span>
         </div>
+
+        {actionMessage ? (
+          <div
+            style={{
+              marginBottom: 18,
+              padding: 14,
+              borderRadius: 14,
+              background: "rgba(34,197,94,0.12)",
+              border: "1px solid rgba(34,197,94,0.2)",
+              color: "#86efac",
+              fontWeight: 700,
+            }}
+          >
+            {actionMessage}
+          </div>
+        ) : null}
 
         {error ? (
           <div
@@ -423,21 +478,28 @@ export default function MatchesPage() {
                     marginBottom: 10,
                   }}
                 >
-                  Map Pool
+                  Captain Map Veto
                 </div>
 
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                   {(match.map_pool || []).map((mapName, idx) => {
                     const banned = (match.banned_maps || []).includes(mapName);
                     const picked = match.picked_map === mapName;
+                    const busy = busyMapKey === `${match.id}:${mapName}`;
 
                     return (
-                      <div
+                      <button
                         key={`${mapName}-${idx}`}
+                        onClick={() => banMap(match.id, mapName)}
+                        disabled={banned || picked || busy || !!match.picked_map}
                         style={{
                           padding: "10px 14px",
                           borderRadius: 999,
                           fontWeight: 700,
+                          cursor:
+                            banned || picked || busy || !!match.picked_map
+                              ? "not-allowed"
+                              : "pointer",
                           border: picked
                             ? "1px solid rgba(34,197,94,0.35)"
                             : banned
@@ -455,11 +517,32 @@ export default function MatchesPage() {
                             : "#e2e8f0",
                         }}
                       >
-                        {mapName}
-                      </div>
+                        {busy ? "Working..." : mapName}
+                      </button>
                     );
                   })}
                 </div>
+
+                {match.picked_map ? (
+                  <div
+                    style={{
+                      marginTop: 14,
+                      fontWeight: 900,
+                      color: "#86efac",
+                    }}
+                  >
+                    Final map selected: {match.picked_map}
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      marginTop: 14,
+                      color: "#94a3b8",
+                    }}
+                  >
+                    Captains can ban maps until one remains.
+                  </div>
+                )}
               </div>
             </div>
           ))}
