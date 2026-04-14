@@ -146,6 +146,23 @@ export default function HomePage() {
           </a>
 
           <a
+            href="/admin"
+            style={{
+              border: "1px solid rgba(255,255,255,0.15)",
+              background: "rgba(255,255,255,0.05)",
+              color: "white",
+              padding: "15px 24px",
+              borderRadius: 16,
+              fontWeight: 900,
+              textDecoration: "none",
+              textTransform: "uppercase",
+              letterSpacing: 1,
+            }}
+          >
+            Admin
+          </a>
+
+          <a
             href="/me"
             style={{
               border: "1px solid rgba(255,255,255,0.15)",
