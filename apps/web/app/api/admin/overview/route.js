@@ -1,8 +1,41 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
+import { verifySessionToken } from "@/lib/session";
 
 export async function GET() {
   try {
+    const token = cookies().get("gamersonline_session")?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { message: "Not authenticated." },
+        { status: 401 }
+      );
+    }
+
+    let session;
+    try {
+      session = await verifySessionToken(token);
+    } catch (err) {
+      return NextResponse.json(
+        {
+          message: "Invalid session.",
+          error: err instanceof Error ? err.message : String(err),
+        },
+        { status: 401 }
+      );
+    }
+
+    const adminSteamId = process.env.ADMIN_STEAM_ID;
+
+    if (!adminSteamId || session.steamId !== adminSteamId) {
+      return NextResponse.json(
+        { message: "Forbidden. Admin access only." },
+        { status: 403 }
+      );
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
