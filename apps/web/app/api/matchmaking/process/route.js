@@ -71,6 +71,71 @@ function buildConnectString(ip, port, password) {
   return `connect ${ip}:${port}; password ${password}`;
 }
 
+async function sendDiscordWebhook(match) {
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  const teamAList = (match.team_a || [])
+    .map((p) => `• ${p.username} (${p.elo})`)
+    .join("\n");
+
+  const teamBList = (match.team_b || [])
+    .map((p) => `• ${p.username} (${p.elo})`)
+    .join("\n");
+
+  const body = {
+    content: "🎮 **New GamersOnline Match Created**",
+    embeds: [
+      {
+        title: `Match ${match.id}`,
+        color: 3447003,
+        fields: [
+          {
+            name: "Queue",
+            value: `${match.queue_type} | ${match.region}`,
+            inline: true,
+          },
+          {
+            name: "Picked Map",
+            value: match.picked_map || "TBD",
+            inline: true,
+          },
+          {
+            name: "Room Code",
+            value: match.room_code || "TBD",
+            inline: true,
+          },
+          {
+            name: "Team A",
+            value: teamAList || "No players",
+            inline: false,
+          },
+          {
+            name: "Team B",
+            value: teamBList || "No players",
+            inline: false,
+          },
+          {
+            name: "Connect String",
+            value: `\`${match.connect_string || "TBD"}\``,
+            inline: false,
+          },
+        ],
+      },
+    ],
+  };
+
+  try {
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+  } catch {}
+}
+
 export async function POST(request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -139,7 +204,6 @@ export async function POST(request) {
     const pickedMap = pickDefaultMap(mapPool);
     const roomCode = generateRoomCode();
 
-    // Replace these with your real server allocator later
     const connectIp = "123.45.67.89";
     const connectPort = 27015;
     const connectPassword = generatePassword();
@@ -209,6 +273,8 @@ export async function POST(request) {
         { status: 500 }
       );
     }
+
+    await sendDiscordWebhook(match);
 
     return NextResponse.json({
       ok: true,
