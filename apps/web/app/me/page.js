@@ -28,10 +28,26 @@ export default async function MePage() {
       }}
     >
       <div style={{ maxWidth: 980, margin: "0 auto" }}>
-        <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "#93c5fd" }}>
+        <div
+          style={{
+            fontSize: 12,
+            letterSpacing: 2,
+            textTransform: "uppercase",
+            color: "#93c5fd",
+          }}
+        >
           GamersOnline.gg
         </div>
-        <h1 style={{ fontSize: 58, fontWeight: 900, margin: "14px 0 24px", textTransform: "uppercase", letterSpacing: -1 }}>
+
+        <h1
+          style={{
+            fontSize: 58,
+            fontWeight: 900,
+            margin: "14px 0 24px",
+            textTransform: "uppercase",
+            letterSpacing: -1,
+          }}
+        >
           Steam Connected
         </h1>
 
@@ -44,7 +60,14 @@ export default async function MePage() {
             boxShadow: "0 25px 60px rgba(0,0,0,0.22)",
           }}
         >
-          <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 24, alignItems: "center" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "140px 1fr",
+              gap: 24,
+              alignItems: "center",
+            }}
+          >
             <div>
               {session.avatar ? (
                 <img
@@ -52,7 +75,11 @@ export default async function MePage() {
                   alt={session.personaName}
                   width="128"
                   height="128"
-                  style={{ borderRadius: 24, display: "block", border: "1px solid rgba(255,255,255,0.10)" }}
+                  style={{
+                    borderRadius: 24,
+                    display: "block",
+                    border: "1px solid rgba(255,255,255,0.10)",
+                  }}
                 />
               ) : (
                 <div
@@ -68,12 +95,35 @@ export default async function MePage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 42, fontWeight: 900, textTransform: "uppercase" }}>
+              <div
+                style={{
+                  fontSize: 42,
+                  fontWeight: 900,
+                  textTransform: "uppercase",
+                }}
+              >
                 {session.personaName}
               </div>
-              <div style={{ marginTop: 10, fontSize: 18, color: "#cbd5e1" }}>Steam ID: {session.steamId}</div>
 
-              <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 28 }}>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 18,
+                  color: "#cbd5e1",
+                  wordBreak: "break-all",
+                }}
+              >
+                Steam ID: {session.steamId}
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: 14,
+                  flexWrap: "wrap",
+                  marginTop: 28,
+                }}
+              >
                 <a
                   href="/queue"
                   style={{
