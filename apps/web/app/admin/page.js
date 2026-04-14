@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function AdminPage() {
   const [stats, setStats] = useState(null);
@@ -8,6 +8,9 @@ export default function AdminPage() {
   const [recentMatches, setRecentMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState("");
+  const [playerSearch, setPlayerSearch] = useState("");
+  const [matchSearch, setMatchSearch] = useState("");
 
   async function loadAdminData() {
     try {
@@ -63,6 +66,42 @@ export default function AdminPage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  async function copyText(value, label) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(`${label} copied`);
+      setTimeout(() => setCopied(""), 2000);
+    } catch {
+      setCopied("Copy failed");
+      setTimeout(() => setCopied(""), 2000);
+    }
+  }
+
+  const filteredPlayers = useMemo(() => {
+    const q = playerSearch.trim().toLowerCase();
+    if (!q) return topPlayers;
+
+    return topPlayers.filter((player) => {
+      const username = (player.username || "").toLowerCase();
+      const steamId = (player.steam_id || "").toLowerCase();
+      return username.includes(q) || steamId.includes(q);
+    });
+  }, [topPlayers, playerSearch]);
+
+  const filteredMatches = useMemo(() => {
+    const q = matchSearch.trim().toLowerCase();
+    if (!q) return recentMatches;
+
+    return recentMatches.filter((match) => {
+      return (
+        (match.id || "").toLowerCase().includes(q) ||
+        (match.status || "").toLowerCase().includes(q) ||
+        (match.picked_map || "").toLowerCase().includes(q) ||
+        (match.room_code || "").toLowerCase().includes(q)
+      );
+    });
+  }, [recentMatches, matchSearch]);
 
   function StatCard({ label, value }) {
     return (
@@ -130,6 +169,22 @@ export default function AdminPage() {
         >
           Admin Dashboard
         </h1>
+
+        {copied ? (
+          <div
+            style={{
+              marginBottom: 18,
+              padding: 14,
+              borderRadius: 14,
+              background: "rgba(34,197,94,0.12)",
+              border: "1px solid rgba(34,197,94,0.2)",
+              color: "#86efac",
+              fontWeight: 700,
+            }}
+          >
+            {copied}
+          </div>
+        ) : null}
 
         {error ? (
           <div
@@ -201,8 +256,25 @@ export default function AdminPage() {
               Top 10 Players
             </div>
 
+            <input
+              type="text"
+              value={playerSearch}
+              onChange={(e) => setPlayerSearch(e.target.value)}
+              placeholder="Search player or Steam ID"
+              style={{
+                width: "100%",
+                padding: "12px 14px",
+                borderRadius: 14,
+                border: "1px solid rgba(255,255,255,0.10)",
+                background: "#0f172a",
+                color: "#ffffff",
+                outline: "none",
+                marginBottom: 14,
+              }}
+            />
+
             <div style={{ display: "grid", gap: 12 }}>
-              {topPlayers.map((player, idx) => (
+              {filteredPlayers.map((player, idx) => (
                 <div
                   key={player.steam_id || idx}
                   style={{
@@ -279,8 +351,8 @@ export default function AdminPage() {
                 </div>
               ))}
 
-              {!loading && topPlayers.length === 0 ? (
-                <div style={{ color: "#cbd5e1" }}>No player data yet.</div>
+              {!loading && filteredPlayers.length === 0 ? (
+                <div style={{ color: "#cbd5e1" }}>No player data found.</div>
               ) : null}
             </div>
           </div>
@@ -305,8 +377,25 @@ export default function AdminPage() {
               Recent Matches
             </div>
 
+            <input
+              type="text"
+              value={matchSearch}
+              onChange={(e) => setMatchSearch(e.target.value)}
+              placeholder="Search match, status, map, room"
+              style={{
+                width: "100%",
+                padding: "12px 14px",
+                borderRadius: 14,
+                border: "1px solid rgba(255,255,255,0.10)",
+                background: "#0f172a",
+                color: "#ffffff",
+                outline: "none",
+                marginBottom: 14,
+              }}
+            />
+
             <div style={{ display: "grid", gap: 12 }}>
-              {recentMatches.map((match) => (
+              {filteredMatches.map((match) => (
                 <div
                   key={match.id}
                   style={{
@@ -359,11 +448,54 @@ export default function AdminPage() {
                       </div>
                     </div>
                   </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      flexWrap: "wrap",
+                      marginTop: 12,
+                    }}
+                  >
+                    {match.room_code ? (
+                      <button
+                        onClick={() => copyText(match.room_code, "Room code")}
+                        style={{
+                          background: "#0B3C91",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 12,
+                          padding: "10px 14px",
+                          fontWeight: 900,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Copy Room Code
+                      </button>
+                    ) : null}
+
+                    {match.connect_string ? (
+                      <button
+                        onClick={() => copyText(match.connect_string, "Connect string")}
+                        style={{
+                          background: "#111827",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 12,
+                          padding: "10px 14px",
+                          fontWeight: 900,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Copy Connect String
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
               ))}
 
-              {!loading && recentMatches.length === 0 ? (
-                <div style={{ color: "#cbd5e1" }}>No matches yet.</div>
+              {!loading && filteredMatches.length === 0 ? (
+                <div style={{ color: "#cbd5e1" }}>No matches found.</div>
               ) : null}
             </div>
           </div>
