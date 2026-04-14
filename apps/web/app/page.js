@@ -71,8 +71,9 @@ export default function HomePage() {
             marginBottom: 26,
           }}
         >
-          GamersOnline.gg is the next-generation CS2 competitive platform built for serious players,
-          verified matchmaking, and aggressive anti-cheat enforcement.
+          GamersOnline.gg is the next-generation CS2 competitive platform built
+          for serious players, verified matchmaking, and aggressive anti-cheat
+          enforcement.
         </p>
 
         <div style={{ display: "flex", gap: 16, marginTop: 22, flexWrap: "wrap" }}>
@@ -92,6 +93,7 @@ export default function HomePage() {
           >
             Sign in with Steam
           </a>
+
           <a
             href="/queue"
             style={{
@@ -108,6 +110,7 @@ export default function HomePage() {
           >
             Join Queue
           </a>
+
           <a
             href="/matches"
             style={{
@@ -124,6 +127,7 @@ export default function HomePage() {
           >
             View Matches
           </a>
+
           <a
             href="/me"
             style={{
@@ -207,15 +211,38 @@ export default function HomePage() {
             boxShadow: "0 28px 60px rgba(0,0,0,0.28)",
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 20,
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
             <div>
-              <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "#94a3b8" }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  letterSpacing: 2,
+                  textTransform: "uppercase",
+                  color: "#94a3b8",
+                }}
+              >
                 Live Queue Status
               </div>
-              <div style={{ marginTop: 10, fontSize: 34, fontWeight: 900, textTransform: "uppercase" }}>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 34,
+                  fontWeight: 900,
+                  textTransform: "uppercase",
+                }}
+              >
                 NA Premier 5v5
               </div>
             </div>
+
             <div
               style={{
                 border: "1px solid rgba(34,197,94,0.2)",
