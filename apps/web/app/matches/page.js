@@ -45,6 +45,30 @@ export default function MatchesPage() {
     return () => clearInterval(interval);
   }, []);
 
+  function renderPlayerCard(player, idx) {
+    return (
+      <div
+        key={player.id || player.steam_id || idx}
+        style={{
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 14,
+          padding: 12,
+          background: "rgba(2,6,23,0.45)",
+        }}
+      >
+        <div style={{ fontWeight: 900 }}>
+          {player.username || "Unknown Player"}
+        </div>
+        <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>
+          Steam ID: {player.steam_id}
+        </div>
+        <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>
+          ELO: {player.elo}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main
       style={{
@@ -232,14 +256,46 @@ export default function MatchesPage() {
                     {match.status}
                   </div>
                 </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#93c5fd",
+                    }}
+                  >
+                    Picked Map
+                  </div>
+                  <div style={{ marginTop: 6, fontWeight: 900 }}>
+                    {match.picked_map || "TBD"}
+                  </div>
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#93c5fd",
+                    }}
+                  >
+                    Room Code
+                  </div>
+                  <div style={{ marginTop: 6, fontWeight: 900 }}>
+                    {match.room_code || "TBD"}
+                  </div>
+                </div>
               </div>
 
               <div
                 style={{
+                  marginTop: 20,
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
                   gap: 18,
-                  marginTop: 24,
                 }}
               >
                 <div
@@ -261,39 +317,38 @@ export default function MatchesPage() {
                     Team A
                   </div>
 
-                  <div
-                    style={{
-                      marginTop: 8,
-                      fontWeight: 900,
-                      fontSize: 18,
-                      marginBottom: 14,
-                    }}
-                  >
-                    Avg/Total ELO: {match.team_a_elo || 0}
+                  <div style={{ marginTop: 8, fontWeight: 900, fontSize: 18 }}>
+                    Total ELO: {match.team_a_elo || 0}
                   </div>
 
-                  <div style={{ display: "grid", gap: 10 }}>
-                    {(match.team_a || []).map((player, idx) => (
+                  {match.captain_a ? (
+                    <div
+                      style={{
+                        marginTop: 10,
+                        marginBottom: 14,
+                        padding: 10,
+                        borderRadius: 12,
+                        background: "rgba(255,255,255,0.05)",
+                      }}
+                    >
                       <div
-                        key={player.id || player.steam_id || idx}
                         style={{
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          borderRadius: 14,
-                          padding: 12,
-                          background: "rgba(2,6,23,0.45)",
+                          fontSize: 12,
+                          textTransform: "uppercase",
+                          color: "#93c5fd",
+                          letterSpacing: 1,
                         }}
                       >
-                        <div style={{ fontWeight: 900 }}>
-                          {player.username || "Unknown Player"}
-                        </div>
-                        <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>
-                          Steam ID: {player.steam_id}
-                        </div>
-                        <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>
-                          ELO: {player.elo}
-                        </div>
+                        Captain
                       </div>
-                    ))}
+                      <div style={{ marginTop: 4, fontWeight: 900 }}>
+                        {match.captain_a.username}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {(match.team_a || []).map(renderPlayerCard)}
                   </div>
                 </div>
 
@@ -316,40 +371,94 @@ export default function MatchesPage() {
                     Team B
                   </div>
 
-                  <div
-                    style={{
-                      marginTop: 8,
-                      fontWeight: 900,
-                      fontSize: 18,
-                      marginBottom: 14,
-                    }}
-                  >
-                    Avg/Total ELO: {match.team_b_elo || 0}
+                  <div style={{ marginTop: 8, fontWeight: 900, fontSize: 18 }}>
+                    Total ELO: {match.team_b_elo || 0}
                   </div>
 
-                  <div style={{ display: "grid", gap: 10 }}>
-                    {(match.team_b || []).map((player, idx) => (
+                  {match.captain_b ? (
+                    <div
+                      style={{
+                        marginTop: 10,
+                        marginBottom: 14,
+                        padding: 10,
+                        borderRadius: 12,
+                        background: "rgba(255,255,255,0.05)",
+                      }}
+                    >
                       <div
-                        key={player.id || player.steam_id || idx}
                         style={{
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          borderRadius: 14,
-                          padding: 12,
-                          background: "rgba(2,6,23,0.45)",
+                          fontSize: 12,
+                          textTransform: "uppercase",
+                          color: "#fecaca",
+                          letterSpacing: 1,
                         }}
                       >
-                        <div style={{ fontWeight: 900 }}>
-                          {player.username || "Unknown Player"}
-                        </div>
-                        <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>
-                          Steam ID: {player.steam_id}
-                        </div>
-                        <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>
-                          ELO: {player.elo}
-                        </div>
+                        Captain
                       </div>
-                    ))}
+                      <div style={{ marginTop: 4, fontWeight: 900 }}>
+                        {match.captain_b.username}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {(match.team_b || []).map(renderPlayerCard)}
                   </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 18,
+                  borderTop: "1px solid rgba(255,255,255,0.08)",
+                  paddingTop: 16,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 12,
+                    letterSpacing: 2,
+                    textTransform: "uppercase",
+                    color: "#93c5fd",
+                    marginBottom: 10,
+                  }}
+                >
+                  Map Pool
+                </div>
+
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                  {(match.map_pool || []).map((mapName, idx) => {
+                    const banned = (match.banned_maps || []).includes(mapName);
+                    const picked = match.picked_map === mapName;
+
+                    return (
+                      <div
+                        key={`${mapName}-${idx}`}
+                        style={{
+                          padding: "10px 14px",
+                          borderRadius: 999,
+                          fontWeight: 700,
+                          border: picked
+                            ? "1px solid rgba(34,197,94,0.35)"
+                            : banned
+                            ? "1px solid rgba(239,68,68,0.35)"
+                            : "1px solid rgba(255,255,255,0.10)",
+                          background: picked
+                            ? "rgba(34,197,94,0.12)"
+                            : banned
+                            ? "rgba(239,68,68,0.12)"
+                            : "rgba(255,255,255,0.04)",
+                          color: picked
+                            ? "#86efac"
+                            : banned
+                            ? "#fecaca"
+                            : "#e2e8f0",
+                        }}
+                      >
+                        {mapName}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
