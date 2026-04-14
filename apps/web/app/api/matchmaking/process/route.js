@@ -53,9 +53,22 @@ function generateRoomCode() {
   return code;
 }
 
+function generatePassword() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let password = "";
+  for (let i = 0; i < 10; i++) {
+    password += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return password;
+}
+
 function pickDefaultMap(mapPool) {
   if (!mapPool || mapPool.length === 0) return null;
   return mapPool[0];
+}
+
+function buildConnectString(ip, port, password) {
+  return `connect ${ip}:${port}; password ${password}`;
 }
 
 export async function POST(request) {
@@ -126,6 +139,16 @@ export async function POST(request) {
     const pickedMap = pickDefaultMap(mapPool);
     const roomCode = generateRoomCode();
 
+    // Replace these with your real server allocator later
+    const connectIp = "123.45.67.89";
+    const connectPort = 27015;
+    const connectPassword = generatePassword();
+    const connectString = buildConnectString(
+      connectIp,
+      connectPort,
+      connectPassword
+    );
+
     const { data: match, error: matchError } = await supabase
       .from("matches")
       .insert({
@@ -144,6 +167,10 @@ export async function POST(request) {
         banned_maps: bannedMaps,
         picked_map: pickedMap,
         room_code: roomCode,
+        connect_ip: connectIp,
+        connect_port: connectPort,
+        connect_password: connectPassword,
+        connect_string: connectString,
       })
       .select()
       .single();
