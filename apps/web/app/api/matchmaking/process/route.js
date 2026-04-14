@@ -1,8 +1,20 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+const DEFAULT_MAP_POOL = [
+  "Mirage",
+  "Inferno",
+  "Nuke",
+  "Ancient",
+  "Anubis",
+  "Dust II",
+  "Train"
+];
+
 function splitTeams(players) {
-  const sorted = [...players].sort((a, b) => (b.elo || 1000) - (a.elo || 1000));
+  const sorted = [...players].sort(
+    (a, b) => (b.elo || 1000) - (a.elo || 1000)
+  );
 
   const teamA = [];
   const teamB = [];
@@ -25,6 +37,25 @@ function splitTeams(players) {
     teamAElo,
     teamBElo,
   };
+}
+
+function pickCaptain(team) {
+  if (!team || team.length === 0) return null;
+  return [...team].sort((a, b) => (b.elo || 1000) - (a.elo || 1000))[0];
+}
+
+function generateRoomCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+function pickDefaultMap(mapPool) {
+  if (!mapPool || mapPool.length === 0) return null;
+  return mapPool[0];
 }
 
 export async function POST(request) {
@@ -87,6 +118,14 @@ export async function POST(request) {
 
     const { teamA, teamB, teamAElo, teamBElo } = splitTeams(players);
 
+    const captainA = pickCaptain(teamA);
+    const captainB = pickCaptain(teamB);
+
+    const mapPool = [...DEFAULT_MAP_POOL];
+    const bannedMaps = [];
+    const pickedMap = pickDefaultMap(mapPool);
+    const roomCode = generateRoomCode();
+
     const { data: match, error: matchError } = await supabase
       .from("matches")
       .insert({
@@ -99,6 +138,12 @@ export async function POST(request) {
         team_b: teamB,
         team_a_elo: teamAElo,
         team_b_elo: teamBElo,
+        captain_a: captainA,
+        captain_b: captainB,
+        map_pool: mapPool,
+        banned_maps: bannedMaps,
+        picked_map: pickedMap,
+        room_code: roomCode,
       })
       .select()
       .single();
