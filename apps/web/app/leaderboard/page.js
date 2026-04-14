@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 function winRate(player) {
   const wins = player.wins || 0;
@@ -13,6 +13,7 @@ export default function LeaderboardPage() {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
   async function loadLeaderboard() {
     try {
@@ -52,6 +53,17 @@ export default function LeaderboardPage() {
     return () => clearInterval(interval);
   }, []);
 
+  const filteredPlayers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return players;
+
+    return players.filter((player) => {
+      const username = (player.username || "").toLowerCase();
+      const steamId = (player.steam_id || "").toLowerCase();
+      return username.includes(q) || steamId.includes(q);
+    });
+  }, [players, search]);
+
   return (
     <main
       style={{
@@ -88,35 +100,60 @@ export default function LeaderboardPage() {
 
         <div
           style={{
-            display: "inline-flex",
+            display: "flex",
+            gap: 14,
             alignItems: "center",
-            gap: 12,
+            flexWrap: "wrap",
             marginBottom: 22,
-            padding: "10px 16px",
-            borderRadius: 999,
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
           }}
         >
-          <span
+          <div
             style={{
-              color: "#94a3b8",
-              fontSize: 14,
-              textTransform: "uppercase",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "10px 16px",
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
             }}
           >
-            Ranked players
-          </span>
+            <span
+              style={{
+                color: "#94a3b8",
+                fontSize: 14,
+                textTransform: "uppercase",
+              }}
+            >
+              Ranked players
+            </span>
 
-          <span
+            <span
+              style={{
+                fontWeight: 900,
+                fontSize: 22,
+                color: "#ffffff",
+              }}
+            >
+              {loading ? "..." : filteredPlayers.length}
+            </span>
+          </div>
+
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search player or Steam ID"
             style={{
-              fontWeight: 900,
-              fontSize: 22,
+              minWidth: 300,
+              padding: "12px 14px",
+              borderRadius: 14,
+              border: "1px solid rgba(255,255,255,0.10)",
+              background: "#0f172a",
               color: "#ffffff",
+              outline: "none",
             }}
-          >
-            {loading ? "..." : players.length}
-          </span>
+          />
         </div>
 
         {error ? (
@@ -173,14 +210,14 @@ export default function LeaderboardPage() {
             </div>
           ) : null}
 
-          {!loading && players.length === 0 ? (
+          {!loading && filteredPlayers.length === 0 ? (
             <div style={{ padding: 24, color: "#cbd5e1" }}>
-              No players found yet.
+              No matching players found.
             </div>
           ) : null}
 
           {!loading &&
-            players.map((player, idx) => (
+            filteredPlayers.map((player, idx) => (
               <div
                 key={player.steam_id || idx}
                 style={{
@@ -189,7 +226,7 @@ export default function LeaderboardPage() {
                   gap: 12,
                   padding: "16px 18px",
                   borderBottom:
-                    idx === players.length - 1
+                    idx === filteredPlayers.length - 1
                       ? "none"
                       : "1px solid rgba(255,255,255,0.06)",
                   alignItems: "center",
