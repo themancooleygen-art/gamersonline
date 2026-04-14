@@ -1,6 +1,32 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+function splitTeams(players) {
+  const sorted = [...players].sort((a, b) => (b.elo || 1000) - (a.elo || 1000));
+
+  const teamA = [];
+  const teamB = [];
+  let teamAElo = 0;
+  let teamBElo = 0;
+
+  for (const player of sorted) {
+    if (teamA.length < 5 && (teamAElo <= teamBElo || teamB.length >= 5)) {
+      teamA.push(player);
+      teamAElo += player.elo || 1000;
+    } else {
+      teamB.push(player);
+      teamBElo += player.elo || 1000;
+    }
+  }
+
+  return {
+    teamA,
+    teamB,
+    teamAElo,
+    teamBElo,
+  };
+}
+
 export async function POST(request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -59,6 +85,8 @@ export async function POST(request) {
       queued_at: player.created_at,
     }));
 
+    const { teamA, teamB, teamAElo, teamBElo } = splitTeams(players);
+
     const { data: match, error: matchError } = await supabase
       .from("matches")
       .insert({
@@ -67,6 +95,10 @@ export async function POST(request) {
         status: "created",
         player_count: players.length,
         players,
+        team_a: teamA,
+        team_b: teamB,
+        team_a_elo: teamAElo,
+        team_b_elo: teamBElo,
       })
       .select()
       .single();
