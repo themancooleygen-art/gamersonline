@@ -4,23 +4,45 @@ import { useEffect, useState } from "react";
 
 export default function MatchesPage() {
   const [matches, setMatches] = useState([]);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  async function loadMatches() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await fetch("/api/matches", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error
+            ? `${data.message} ${data.error}`
+            : data.message || "Failed to load matches."
+        );
+      }
+
+      setMatches(data.matches || []);
+    } catch (err) {
+      setError(err.message || "Failed to load matches.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadMatches() {
-      try {
-        const res = await fetch("/api/matches");
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to load matches.");
-        setMatches(data.matches || []);
-      } catch (err) {
-        setError(err.message || "Failed to load matches.");
-      } finally {
-        setLoading(false);
-      }
-    }
     loadMatches();
+
+    const interval = setInterval(() => {
+      loadMatches();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -34,16 +56,93 @@ export default function MatchesPage() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <div style={{ maxWidth: 1120, margin: "0 auto" }}>
-        <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "#93c5fd" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div
+          style={{
+            fontSize: 12,
+            letterSpacing: 2,
+            textTransform: "uppercase",
+            color: "#93c5fd",
+          }}
+        >
           GamersOnline.gg
         </div>
-        <h1 style={{ fontSize: 58, fontWeight: 900, margin: "14px 0 24px", textTransform: "uppercase", letterSpacing: -1 }}>
-          Recent Matches
+
+        <h1
+          style={{
+            fontSize: 62,
+            fontWeight: 900,
+            margin: "14px 0 24px",
+            textTransform: "uppercase",
+          }}
+        >
+          Matches
         </h1>
 
-        {loading ? <div style={{ color: "#cbd5e1", fontSize: 18 }}>Loading matches...</div> : null}
-        {error ? <div style={{ color: "#fecaca", marginBottom: 16, fontSize: 18 }}>{error}</div> : null}
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 22,
+            padding: "10px 16px",
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <span
+            style={{
+              color: "#94a3b8",
+              fontSize: 14,
+              textTransform: "uppercase",
+            }}
+          >
+            Recent matches
+          </span>
+
+          <span
+            style={{
+              fontWeight: 900,
+              fontSize: 22,
+              color: "#ffffff",
+            }}
+          >
+            {loading ? "..." : matches.length}
+          </span>
+        </div>
+
+        {error ? (
+          <div
+            style={{
+              marginBottom: 18,
+              padding: 14,
+              borderRadius: 14,
+              background: "rgba(239,68,68,0.12)",
+              border: "1px solid rgba(239,68,68,0.2)",
+              color: "#fecaca",
+              fontWeight: 700,
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {error}
+          </div>
+        ) : null}
+
+        {!loading && matches.length === 0 ? (
+          <div
+            style={{
+              border: "1px solid rgba(255,255,255,0.10)",
+              borderRadius: 24,
+              padding: 24,
+              background: "rgba(255,255,255,0.04)",
+              color: "#cbd5e1",
+              fontSize: 18,
+            }}
+          >
+            No matches created yet.
+          </div>
+        ) : null}
 
         <div style={{ display: "grid", gap: 18 }}>
           {matches.map((match) => (
@@ -57,53 +156,204 @@ export default function MatchesPage() {
                 boxShadow: "0 24px 50px rgba(0,0,0,0.20)",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gap: 16,
+                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                }}
+              >
                 <div>
-                  <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "#93c5fd" }}>Match ID</div>
-                  <div style={{ marginTop: 6, fontWeight: 900 }}>{match.id}</div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#93c5fd",
+                    }}
+                  >
+                    Match ID
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontWeight: 900,
+                      wordBreak: "break-all",
+                    }}
+                  >
+                    {match.id}
+                  </div>
                 </div>
+
                 <div>
-                  <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "#93c5fd" }}>Queue</div>
-                  <div style={{ marginTop: 6, fontWeight: 900 }}>{match.queue_type}</div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#93c5fd",
+                    }}
+                  >
+                    Queue
+                  </div>
+                  <div style={{ marginTop: 6, fontWeight: 900 }}>
+                    {match.queue_type}
+                  </div>
                 </div>
+
                 <div>
-                  <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "#93c5fd" }}>Region</div>
-                  <div style={{ marginTop: 6, fontWeight: 900 }}>{match.region}</div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#93c5fd",
+                    }}
+                  >
+                    Region
+                  </div>
+                  <div style={{ marginTop: 6, fontWeight: 900 }}>
+                    {match.region}
+                  </div>
                 </div>
+
                 <div>
-                  <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "#93c5fd" }}>Status</div>
-                  <div style={{ marginTop: 6, fontWeight: 900 }}>{match.status}</div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#93c5fd",
+                    }}
+                  >
+                    Status
+                  </div>
+                  <div style={{ marginTop: 6, fontWeight: 900 }}>
+                    {match.status}
+                  </div>
                 </div>
               </div>
 
-              <div style={{ marginTop: 18 }}>
-                <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "#93c5fd", marginBottom: 10 }}>
-                  Players
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 18,
+                  marginTop: 24,
+                }}
+              >
+                <div
+                  style={{
+                    border: "1px solid rgba(11,60,145,0.35)",
+                    borderRadius: 20,
+                    padding: 18,
+                    background: "rgba(11,60,145,0.12)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#93c5fd",
+                    }}
+                  >
+                    Team A
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 8,
+                      fontWeight: 900,
+                      fontSize: 18,
+                      marginBottom: 14,
+                    }}
+                  >
+                    Avg/Total ELO: {match.team_a_elo || 0}
+                  </div>
+
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {(match.team_a || []).map((player, idx) => (
+                      <div
+                        key={player.id || player.steam_id || idx}
+                        style={{
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: 14,
+                          padding: 12,
+                          background: "rgba(2,6,23,0.45)",
+                        }}
+                      >
+                        <div style={{ fontWeight: 900 }}>
+                          {player.username || "Unknown Player"}
+                        </div>
+                        <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>
+                          Steam ID: {player.steam_id}
+                        </div>
+                        <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>
+                          ELO: {player.elo}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-                  {(match.players || []).map((player) => (
-                    <div
-                      key={player.id || player.steam_id}
-                      style={{
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        borderRadius: 18,
-                        padding: 14,
-                        background: "rgba(2,6,23,0.50)",
-                      }}
-                    >
-                      <div style={{ fontWeight: 900, fontSize: 18 }}>{player.username || "Unknown Player"}</div>
-                      <div style={{ color: "#cbd5e1", marginTop: 6, fontSize: 14 }}>Steam ID: {player.steam_id}</div>
-                      <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>ELO: {player.elo}</div>
-                    </div>
-                  ))}
+
+                <div
+                  style={{
+                    border: "1px solid rgba(230,57,70,0.35)",
+                    borderRadius: 20,
+                    padding: 18,
+                    background: "rgba(230,57,70,0.12)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      color: "#fecaca",
+                    }}
+                  >
+                    Team B
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 8,
+                      fontWeight: 900,
+                      fontSize: 18,
+                      marginBottom: 14,
+                    }}
+                  >
+                    Avg/Total ELO: {match.team_b_elo || 0}
+                  </div>
+
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {(match.team_b || []).map((player, idx) => (
+                      <div
+                        key={player.id || player.steam_id || idx}
+                        style={{
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: 14,
+                          padding: 12,
+                          background: "rgba(2,6,23,0.45)",
+                        }}
+                      >
+                        <div style={{ fontWeight: 900 }}>
+                          {player.username || "Unknown Player"}
+                        </div>
+                        <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>
+                          Steam ID: {player.steam_id}
+                        </div>
+                        <div style={{ color: "#cbd5e1", marginTop: 4, fontSize: 14 }}>
+                          ELO: {player.elo}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           ))}
-
-          {!loading && !matches.length ? (
-            <div style={{ color: "#cbd5e1", fontSize: 18 }}>No matches created yet.</div>
-          ) : null}
         </div>
       </div>
     </main>
