@@ -8,7 +8,6 @@ export default function QueuePage() {
 
   const [loading, setLoading] = useState(false);
   const [leaving, setLeaving] = useState(false);
-  const [matching, setMatching] = useState(false);
 
   const [queueCount, setQueueCount] = useState(0);
   const [countLoading, setCountLoading] = useState(true);
@@ -79,7 +78,12 @@ export default function QueuePage() {
         );
       }
 
-      setResult(data.message || "Joined queue.");
+      if (data.autoMatched) {
+        setResult("Joined ranked queue and match created automatically.");
+      } else {
+        setResult(data.message || "Joined queue.");
+      }
+
       await loadQueueCount();
     } catch (err) {
       setError(err.message || "Queue join failed.");
@@ -121,42 +125,6 @@ export default function QueuePage() {
       setError(err.message || "Queue leave failed.");
     } finally {
       setLeaving(false);
-    }
-  }
-
-  async function createMatch() {
-    setMatching(true);
-    setResult("");
-    setError("");
-
-    try {
-      const res = await fetch("/api/matchmaking/process", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          region,
-          queueType,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(
-          data.error
-            ? `${data.message} ${data.error}`
-            : data.message || "Matchmaking failed."
-        );
-      }
-
-      setResult(data.message || "Matchmaking complete.");
-      await loadQueueCount();
-    } catch (err) {
-      setError(err.message || "Matchmaking failed.");
-    } finally {
-      setMatching(false);
     }
   }
 
@@ -304,7 +272,7 @@ export default function QueuePage() {
 
             <button
               onClick={joinQueue}
-              disabled={loading || leaving || matching}
+              disabled={loading || leaving}
               style={{
                 background: "#0B3C91",
                 color: "white",
@@ -321,7 +289,7 @@ export default function QueuePage() {
 
             <button
               onClick={leaveQueue}
-              disabled={loading || leaving || matching}
+              disabled={loading || leaving}
               style={{
                 background: "#E63946",
                 color: "white",
@@ -334,23 +302,6 @@ export default function QueuePage() {
               }}
             >
               {leaving ? "Leaving..." : "Leave Queue"}
-            </button>
-
-            <button
-              onClick={createMatch}
-              disabled={loading || leaving || matching}
-              style={{
-                background: "#111827",
-                color: "white",
-                padding: "15px",
-                borderRadius: 15,
-                border: "none",
-                fontWeight: 900,
-                fontSize: 18,
-                cursor: "pointer",
-              }}
-            >
-              {matching ? "Processing..." : "Create Match From Queue"}
             </button>
           </div>
 
@@ -394,7 +345,7 @@ export default function QueuePage() {
               fontSize: 18,
             }}
           >
-            You must be signed in with Steam to join queue.
+            Queue automatically attempts match creation when 10 players are available.
           </div>
         </div>
       </div>
