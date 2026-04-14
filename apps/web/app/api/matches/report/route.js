@@ -24,6 +24,63 @@ function calculateEloChange(teamAElo, teamBElo, winner) {
   };
 }
 
+async function sendDiscordResultWebhook(match, eloChange) {
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  const body = {
+    content: "🏆 **Match Result Reported**",
+    embeds: [
+      {
+        title: `Match ${match.id} Completed`,
+        color: 5763719,
+        fields: [
+          {
+            name: "Winner",
+            value: `Team ${match.winner || "TBD"}`,
+            inline: true,
+          },
+          {
+            name: "Map",
+            value: match.picked_map || "TBD",
+            inline: true,
+          },
+          {
+            name: "Room Code",
+            value: match.room_code || "TBD",
+            inline: true,
+          },
+          {
+            name: "Team A ELO Change",
+            value: `${eloChange.teamA >= 0 ? "+" : ""}${eloChange.teamA}`,
+            inline: true,
+          },
+          {
+            name: "Team B ELO Change",
+            value: `${eloChange.teamB >= 0 ? "+" : ""}${eloChange.teamB}`,
+            inline: true,
+          },
+          {
+            name: "Status",
+            value: match.status || "completed",
+            inline: true,
+          },
+        ],
+      },
+    ],
+  };
+
+  try {
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+  } catch {}
+}
+
 export async function POST(request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -126,7 +183,9 @@ export async function POST(request) {
         .eq("steam_id", player.steam_id)
         .single();
 
-      const nextElo = (existingPlayer?.elo ?? currentElo) + (winner === "A" ? changeA : changeB);
+      const nextElo =
+        (existingPlayer?.elo ?? currentElo) +
+        (winner === "A" ? changeA : changeB);
 
       await supabase
         .from("players")
@@ -147,7 +206,9 @@ export async function POST(request) {
         .eq("steam_id", player.steam_id)
         .single();
 
-      const nextElo = (existingPlayer?.elo ?? currentElo) + (winner === "A" ? changeB : changeA);
+      const nextElo =
+        (existingPlayer?.elo ?? currentElo) +
+        (winner === "A" ? changeB : changeA);
 
       await supabase
         .from("players")
@@ -181,13 +242,17 @@ export async function POST(request) {
       );
     }
 
+    const eloChange = {
+      teamA: changeA,
+      teamB: changeB,
+    };
+
+    await sendDiscordResultWebhook(updatedMatch, eloChange);
+
     return NextResponse.json({
       ok: true,
       match: updatedMatch,
-      eloChange: {
-        teamA: changeA,
-        teamB: changeB,
-      },
+      eloChange,
       message: `Team ${winner} reported as winner. ELO updated successfully.`,
     });
   } catch (err) {
